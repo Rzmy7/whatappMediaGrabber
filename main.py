@@ -4,6 +4,15 @@ from playwright.async_api import async_playwright
 
 chat_name = "All in One"
 
+
+async def wait_for_image(img_loc, timeout=15_000):
+    """Wait until <img> is visible AND its bitmap loaded."""
+    await img_loc.wait_for(state='visible', timeout=timeout)
+    await img_loc.wait_for_function(
+        "el => el.complete && el.naturalWidth > 0",
+        timeout=timeout
+    )
+
 async def main():
     async with async_playwright() as p:
 
@@ -59,8 +68,18 @@ async def main():
         for i in range(1,count_text):
             await page.wait_for_selector('img[src]', timeout=15_000)
             await page.wait_for_load_state("networkidle")
-            await asyncio.sleep(0.2)
             big_img = page.locator('img[src]').nth(1)
+
+            try:
+                await big_img.click()
+                # await asyncio.sleep(0.01)
+                await big_img.click()
+            except Exception as e:
+                print(e)
+
+
+            # await asyncio.sleep(0.2)
+            # await wait_for_image(big_img)
             src_url = await big_img.get_attribute("src")
             print("Found image URL:", src_url)
 
