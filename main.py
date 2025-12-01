@@ -67,23 +67,30 @@ async def main():
 
         for i in range(1,count_text):
             await page.wait_for_selector('img[src]', timeout=15_000)
-            await page.wait_for_load_state("networkidle")
-            big_img = page.locator('img[src]').nth(1)
 
-            try:
-                await big_img.click()
-                # await asyncio.sleep(0.01)
-                await big_img.click()
+            try :
+                await page.wait_for_load_state("networkidle" , timeout=6_000)
+                big_img = page.locator('img[src]').nth(1)
+
+                try:
+                    await big_img.dblclick()
+                    src_url = await big_img.get_attribute("src")
+                    print("Found image URL:", src_url)
+
+                    # await page.keyboard.press("ArrowLeft")
+
+                except Exception as e:
+                    print(e)
+
             except Exception as e:
                 print(e)
+
+            await page.keyboard.press("ArrowLeft")
 
 
             # await asyncio.sleep(0.2)
             # await wait_for_image(big_img)
-            src_url = await big_img.get_attribute("src")
-            print("Found image URL:", src_url)
 
-            await page.keyboard.press("ArrowLeft")
 
 
 
