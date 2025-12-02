@@ -63,7 +63,7 @@ async def main():
 
         await page.wait_for_selector('div[aria-label=" Image"]')
         image_locator = page.locator('div[aria-label=" Image"]').first
-        await image_locator.click()
+        await image_locator.click(timeout=2_000)
 
         for i in range(1,count_text):
             await page.wait_for_selector('img[src]', timeout=15_000)
