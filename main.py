@@ -1,10 +1,8 @@
-import aiofiles, pathlib
-import asyncio
+import pathlib,asyncio
 from playwright.async_api import async_playwright,Page
 from typing import Union
 import os
 
-# chat_name = "🌿🍃🎼🎙️"
 
 
 async def download_image(
@@ -13,18 +11,6 @@ async def download_image(
     save_path: str,
     create_dirs: bool = True
 ) -> bool:
-    """
-    Download an image from a page and save it locally using browser's fetch API.
-    
-    Args:
-        page: Playwright page object
-        image_source: Either a direct image URL (str) or a Playwright locator/element
-        save_path: Full path where the image should be saved (e.g., '/path/to/image.png')
-        create_dirs: If True, creates parent directories if they don't exist
-    
-    Returns:
-        bool: True if download successful, False otherwise
-    """
     try:
         # If image_source is a locator/element, extract the src attribute
         if not isinstance(image_source, str):
@@ -283,7 +269,7 @@ async def menu():
     if selection == 1:
         await syncer()
     elif selection == 2:
-        chat_name = input("Enter the exact chat or group name (with emojis if any): ")
+        chat_name = input("Enter the exact group name (with emojis if any): ")
         await grabber(chat_name)
     elif selection==3:
         exit
