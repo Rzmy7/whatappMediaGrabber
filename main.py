@@ -1,21 +1,69 @@
 import aiofiles, pathlib
 import asyncio
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright,Page
+from typing import Union
+import os
 
 chat_name = "🌿🍃🎼🎙️"
 
 
-async def wait_for_image(img_loc, timeout=15_000):
-    """Wait until <img> is visible AND its bitmap loaded."""
+async def download_image(
+    page: Page, 
+    image_source: Union[str, any],  # URL string or locator/element
+    save_path: str,
+    create_dirs: bool = True
+) -> bool:
+    """
+    Download an image from a page and save it locally using browser's fetch API.
+    
+    Args:
+        page: Playwright page object
+        image_source: Either a direct image URL (str) or a Playwright locator/element
+        save_path: Full path where the image should be saved (e.g., '/path/to/image.png')
+        create_dirs: If True, creates parent directories if they don't exist
+    
+    Returns:
+        bool: True if download successful, False otherwise
+    """
     try:
-        await img_loc.wait_for(state='visible', timeout=timeout)
-        await img_loc.wait_for_function(
-            "el => el.complete && el.naturalWidth > 0",
-            timeout=timeout
+        # If image_source is a locator/element, extract the src attribute
+        if not isinstance(image_source, str):
+            # Assume it's a locator or element handle
+            image_url = await image_source.get_attribute('src')
+            if not image_url:
+                print("Could not find 'src' attribute on the element")
+                return False
+        else:
+            image_url = image_source
+            
+        # Create directories if needed
+        if create_dirs:
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        
+        # Get image bytes using fetch inside the browser
+        img_bytes = await page.evaluate(
+            """async url => {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const buffer = await response.arrayBuffer();
+                return Array.from(new Uint8Array(buffer));
+            }""",
+            image_url,
         )
+        
+        # Write to file
+        with open(save_path, 'wb') as file:
+            file.write(bytes(img_bytes))
+            
+        print(f"✓ Image downloaded successfully: {save_path}")
+        return True
+        
     except Exception as e:
-        print(f"[wait_for_image] Exception: {e}")
-        raise
+        print(f"✗ Failed to download image: {e}")
+        return False
+
 
 
 async def main():
@@ -148,11 +196,13 @@ async def main():
                         prev_button_state = await prev_button.get_attribute('aria-disabled')
                         # print("[PrevButton Status] : ",prev_button_state)
                         
+                        await download_image(page, src_url, str(out_dir / f"image_{i}.png"))
+                        
                         if (prev_button_state == 'false') :
                             await prev_button.click()
                         elif (prev_button_state == 'true') :
                             print("End of the Images")
-                            return
+                            break
                             
                     except Exception as e:
                         print(f"[Image {i} Previous Button locating] Exception: {e}")
@@ -176,6 +226,7 @@ async def main():
             #     print("[Sleep] Cancelled")
             # except Exception as e:
             #     print(f"[Sleep] Exception: {e}")
+            # await asyncio.sleep(60)
 
             try:
                 await context.close()
