@@ -4,7 +4,7 @@ from playwright.async_api import async_playwright,Page
 from typing import Union
 import os
 
-chat_name = "🌿🍃🎼🎙️"
+# chat_name = "🌿🍃🎼🎙️"
 
 
 async def download_image(
@@ -66,7 +66,7 @@ async def download_image(
 
 
 
-async def main():
+async def grabber(chat_name: str):
     try:
         async with async_playwright() as p:
 
@@ -196,7 +196,7 @@ async def main():
                         prev_button_state = await prev_button.get_attribute('aria-disabled')
                         # print("[PrevButton Status] : ",prev_button_state)
                         
-                        await download_image(page, src_url, str(out_dir / f"image_{i}.png"))
+                        await download_image(page, src_url, str(out_dir / f"{chat_name}_image_{i}.png"))
                         
                         if (prev_button_state == 'false') :
                             await prev_button.click()
@@ -283,7 +283,8 @@ async def menu():
     if selection == 1:
         await syncer()
     elif selection == 2:
-        await main()
+        chat_name = input("Enter the exact chat or group name (with emojis if any): ")
+        await grabber(chat_name)
     elif selection==3:
         exit
 
