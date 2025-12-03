@@ -115,7 +115,7 @@ async def main():
                 await context.close()
                 return
             
-            for i in range(1, count_text):
+            for i in range(1, count_text+1):
                 try :
                     await page.wait_for_selector('img[src]', timeout=15_000)
 
@@ -141,9 +141,28 @@ async def main():
                     print(f"[Image {i} Selector] Exception: {e}")
 
                 try:
-                    await page.keyboard.press("ArrowLeft")
+                    await page.wait_for_selector('button[aria-label="Previous"]', timeout=15_000)
+                    
+                    try:
+                        prev_button = page.locator('button[aria-label="Previous"]')
+                        prev_button_state = await prev_button.get_attribute('aria-disabled')
+                        # print("[PrevButton Status] : ",prev_button_state)
+                        
+                        if (prev_button_state == 'false') :
+                            await prev_button.click()
+                        elif (prev_button_state == 'true') :
+                            print("End of the Images")
+                            return
+                            
+                    except Exception as e:
+                        print(f"[Image {i} Previous Button locating] Exception: {e}")
                 except Exception as e:
-                    print(f"[Image {i} ArrowLeft] Exception: {e}")
+                    print(f"[Image {i} Previous Button waiting] Exception: {e}")
+
+                # try:
+                #     await page.keyboard.press("ArrowLeft")
+                # except Exception as e:
+                #     print(f"[Image {i} ArrowLeft] Exception: {e}")
 
                 # await asyncio.sleep(0.2)
                 # await wait_for_image(big_img)
@@ -151,15 +170,15 @@ async def main():
             # image_locator = page.locator('div[aria-label=" Image"]').first
             # await image_locator.click()
 
-            try:
-                await asyncio.sleep(1000000)
-            except asyncio.CancelledError:
-                print("[Sleep] Cancelled")
-            except Exception as e:
-                print(f"[Sleep] Exception: {e}")
+            # try:
+            #     await asyncio.sleep(1000000)
+            # except asyncio.CancelledError:
+            #     print("[Sleep] Cancelled")
+            # except Exception as e:
+            #     print(f"[Sleep] Exception: {e}")
 
             try:
-                context.close()
+                await context.close()
                 print("Browser closed")
             except Exception as e:
                 print(f"[Context Close] Exception: {e}")
