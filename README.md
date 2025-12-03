@@ -29,8 +29,8 @@ Perfect for backing up photos from family groups, work chats, or meme channels â
 
 ```bash
 # Clone or download this script
-git clone https://github.com/yourusername/whatsapp-image-grabber.git
-cd whatsapp-image-grabber
+git clone https://github.com/Rzmy7/whatappMediaGrabber.git
+cd whatappMediaGrabber
 
 # Install playwright
 pip install playwright
